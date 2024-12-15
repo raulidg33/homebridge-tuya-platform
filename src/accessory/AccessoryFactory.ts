@@ -43,6 +43,7 @@ import VibrationSensorAccessory from './VibrationSensorAccessory';
 import WeatherStationAccessory from './WeatherStationAccessory';
 import DoorbellAccessory from './DoorbellAccessory';
 import PetFeederAccessory from './PetFeederAccessory';
+import WhiteNoiseLightAccessory from './WhiteNoiseLightAccessory';
 
 
 export default class AccessoryFactory {
@@ -90,6 +91,9 @@ export default class AccessoryFactory {
         break;
       case 'cjkg':
         handler = new SceneSwitchAccessory(platform, accessory);
+        break;
+      case 'bzyd':
+        handler = new WhiteNoiseLightAccessory(platform, accessory);
         break;
 
       // Large Home Appliances

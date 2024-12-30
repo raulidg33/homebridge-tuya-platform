@@ -25,9 +25,9 @@ const SCHEMA_CODE = {
   TARGET_HUMIDITY: ['humidity_set'],
 };
 
-const AC_MODES = ['auto', 'cold', 'hot'];
-const DEHUMIDIFIER_MODE = 'wet';
-const FAN_MODE = 'wind';
+const AC_MODES = ['Cool', 'Heat'];
+const DEHUMIDIFIER_MODE = 'Dyr';
+const FAN_MODE = 'Fan';
 
 export default class AirConditionerAccessory extends BaseAccessory {
 
@@ -65,7 +65,6 @@ export default class AirConditionerAccessory extends BaseAccessory {
           code: activeSchema.code,
           value: (value === ACTIVE) ? true : false,
         }];
-
         const modeStatus = this.getStatus(modeSchema.code)!;
         if (!AC_MODES.includes(modeStatus.value as string)) {
           for (const mode of AC_MODES) {
@@ -200,9 +199,9 @@ export default class AirConditionerAccessory extends BaseAccessory {
     this.mainService().getCharacteristic(this.Characteristic.CurrentHeaterCoolerState)
       .onGet(() => {
         const status = this.getStatus(schema.code)!;
-        if (status.value === 'heating' || status.value === 'hot') {
+        if (status.value === 'heating' || status.value === 'Heat') {
           return HEATING;
-        } else if (status.value === 'cooling' || status.value === 'cold') {
+        } else if (status.value === 'cooling' || status.value === 'Cool') {
           return COOLING;
         } else {
           return INACTIVE;
@@ -220,13 +219,14 @@ export default class AirConditionerAccessory extends BaseAccessory {
 
     const validValues: number[] = [];
     const property = schema.property as TuyaDeviceSchemaEnumProperty;
+
     if (property.range.includes('auto')) {
       validValues.push(AUTO);
     }
-    if (property.range.includes('hot')) {
+    if (property.range.includes('Heat')) {
       validValues.push(HEAT);
     }
-    if (property.range.includes('cold')) {
+    if (property.range.includes('Cool')) {
       validValues.push(COOL);
     }
 
@@ -238,9 +238,9 @@ export default class AirConditionerAccessory extends BaseAccessory {
     this.mainService().getCharacteristic(this.Characteristic.TargetHeaterCoolerState)
       .onGet(() => {
         const status = this.getStatus(schema.code)!;
-        if (status.value === 'hot') {
+        if (status.value === 'Heat') {
           return HEAT;
-        } else if (status.value === 'cold') {
+        } else if (status.value === 'Cool') {
           return COOL;
         }
 
@@ -250,9 +250,9 @@ export default class AirConditionerAccessory extends BaseAccessory {
 
         let mode: string;
         if (value === HEAT) {
-          mode = 'hot';
+          mode = 'Heat';
         } else if (value === COOL) {
-          mode = 'cold';
+          mode = 'Cool';
         } else {
           mode = 'auto';
         }

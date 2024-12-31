@@ -19,7 +19,7 @@ const SCHEMA_CODE = {
   SPEED_LEVEL: ['fan_speed_enum', 'windspeed'],
   LOCK: ['lock', 'child_lock'],
   TEMP_UNIT_CONVERT: ['temp_unit_convert', 'c_f'],
-  SWING: ['switch_horizontal', 'switch_vertical'],
+  SWING: ['switch_horizontal', 'switch_vertical', 'windshake'],
   // Dehumidifier
   CURRENT_HUMIDITY: ['humidity_current'],
   TARGET_HUMIDITY: ['humidity_set'],
@@ -48,6 +48,7 @@ export default class AirConditionerAccessory extends BaseAccessory {
   configureAirConditioner() {
     const activeSchema = this.getSchema(...SCHEMA_CODE.ACTIVE)!;
     const modeSchema = this.getSchema(...SCHEMA_CODE.MODE)!;
+    const swingSchema = this.getSchema(...SCHEMA_CODE.SWING)!;
     const modeProperty = modeSchema.property as TuyaDeviceSchemaEnumProperty;
 
     const service = this.mainService();
@@ -78,6 +79,22 @@ export default class AirConditionerAccessory extends BaseAccessory {
         await this.sendCommands(commands, true);
       });
 
+    const { SWING_DISABLED, SWING_ENABLED } = this.Characteristic.SwingMode;
+    this.log.warn('swings:', SWING_ENABLED, SWING_DISABLED);
+    service.getCharacteristic(this.Characteristic.SwingMode)
+      .onGet(() => {
+        const status = this.getStatus(swingSchema.code)!;
+        this.log.warn('getting value', status.value);
+        return (status.value === 'ON') ? SWING_ENABLED : SWING_DISABLED;
+      })
+      .onSet(async (value) => {
+        this.log.warn('setting value', value);
+        await this.sendCommands([{
+          code: swingSchema.code,
+          value: (value === SWING_ENABLED) ? 'ON' : 'OFF',
+        }], true);
+      });
+
     this.configureCurrentState();
     this.configureTargetState();
     configureCurrentTemperature(this, service, this.getSchema(...SCHEMA_CODE.CURRENT_TEMP));
@@ -94,6 +111,7 @@ export default class AirConditionerAccessory extends BaseAccessory {
   configureDehumidifier() {
     const activeSchema = this.getSchema(...SCHEMA_CODE.ACTIVE)!;
     const modeSchema = this.getSchema(...SCHEMA_CODE.MODE)!;
+    const swingSchema = this.getSchema(...SCHEMA_CODE.SWING)!;
     const property = modeSchema.property as TuyaDeviceSchemaEnumProperty;
     if (!property.range.includes(DEHUMIDIFIER_MODE)) {
       return;
@@ -116,6 +134,22 @@ export default class AirConditionerAccessory extends BaseAccessory {
         }, {
           code: modeSchema.code,
           value: DEHUMIDIFIER_MODE,
+        }], true);
+      });
+
+    const { SWING_DISABLED, SWING_ENABLED } = this.Characteristic.SwingMode;
+    this.log.warn('swings:', SWING_ENABLED, SWING_DISABLED);
+    service.getCharacteristic(this.Characteristic.SwingMode)
+      .onGet(() => {
+        const status = this.getStatus(swingSchema.code)!;
+        this.log.warn('getting value', status.value);
+        return (status.value === 'ON') ? SWING_ENABLED : SWING_DISABLED;
+      })
+      .onSet(async (value) => {
+        this.log.warn('setting value', value);
+        await this.sendCommands([{
+          code: swingSchema.code,
+          value: (value === SWING_ENABLED) ? 'ON' : 'OFF',
         }], true);
       });
 
@@ -143,6 +177,7 @@ export default class AirConditionerAccessory extends BaseAccessory {
   configureFan() {
     const activeSchema = this.getSchema(...SCHEMA_CODE.ACTIVE)!;
     const modeSchema = this.getSchema(...SCHEMA_CODE.MODE)!;
+    const swingSchema = this.getSchema(...SCHEMA_CODE.SWING)!;
     const property = modeSchema.property as TuyaDeviceSchemaEnumProperty;
     if (!property.range.includes(FAN_MODE)) {
       return;
@@ -167,7 +202,21 @@ export default class AirConditionerAccessory extends BaseAccessory {
           value: FAN_MODE,
         }], true);
       });
-
+    const { SWING_DISABLED, SWING_ENABLED } = this.Characteristic.SwingMode;
+    this.log.warn('swings:', SWING_ENABLED, SWING_DISABLED);
+    service.getCharacteristic(this.Characteristic.SwingMode)
+      .onGet(() => {
+        const status = this.getStatus(swingSchema.code)!;
+        this.log.warn('getting value', status.value);
+        return (status.value === 'ON') ? SWING_ENABLED : SWING_DISABLED;
+      })
+      .onSet(async (value) => {
+        this.log.warn('setting value', value);
+        await this.sendCommands([{
+          code: swingSchema.code,
+          value: (value === SWING_ENABLED) ? 'ON' : 'OFF',
+        }], true);
+      });
     // Optional Characteristics
     configureLockPhysicalControls(this, service, this.getSchema(...SCHEMA_CODE.LOCK));
     configureRotationSpeedLevel(this, service, this.getSchema(...SCHEMA_CODE.SPEED_LEVEL), ['auto']);
